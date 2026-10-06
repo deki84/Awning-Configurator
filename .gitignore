@@ -1,0 +1,33 @@
+cat > .gitignore << 'EOF'
+node_modules
+dist
+.next
+.turbo
+coverage
+.env
+*.log
+.DS_Store
+EOF
+
+cat > pnpm-workspace.yaml << 'EOF'
+packages:
+  - "apps/*"
+  - "services/*"
+  - "packages/*"
+EOF
+
+cat > turbo.json << 'EOF'
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": { "cache": false, "persistent": true },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "lint": {},
+    "test": { "outputs": [] },
+    "typecheck": { "outputs": [] }
+  }
+}
+EOF
