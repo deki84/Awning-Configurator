@@ -90,10 +90,10 @@ packages/
 - [x] Monorepo with pnpm workspaces and Turborepo
 - [x] Shared pricing logic, developed test-first
 - [x] product-service with REST API and integration tests
-- [ ] order-service with PostgreSQL
+- [x] order-service with PostgreSQL
 - [ ] Docker images and Docker Compose
 - [ ] Kubernetes deployment (k3d)
-- [ ] CI pipeline with GitHub Actions
+- [x] CI pipeline with GitHub Actions
 - [ ] GitOps deployment with Argo CD
 
 ## Author
