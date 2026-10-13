@@ -91,7 +91,7 @@ packages/
 - [x] Shared pricing logic, developed test-first
 - [x] product-service with REST API and integration tests
 - [x] order-service with PostgreSQL
-- [ ] Docker images and Docker Compose
+- [x] Docker images and Docker Compose
 - [ ] Kubernetes deployment (k3d)
 - [x] CI pipeline with GitHub Actions
 - [ ] GitOps deployment with Argo CD

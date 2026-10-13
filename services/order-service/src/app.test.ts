@@ -62,3 +62,72 @@ describe("GET /health/ready (readiness)", () => {
     await app.close();
   });
 });
+describe("POST /orders", () => {
+  // Gültige Beispielbestellung: 4 m breit, 2,5 m Ausladung, Stoff A, ohne Motor
+  const validOrder = {
+    widthCm: 400,
+    projectionCm: 250,
+    fabricCategory: "A",
+    motor: false,
+    customerEmail: "kunde@example.com",
+  };
+
+  // Baut die App mit einer Fake-Speicherfunktion, die mitschreibt,
+  // womit sie aufgerufen wurde
+  function makeApp() {
+    const saveOrder = vi.fn(fakeSaveOrder);
+    const app = buildApp({ ...healthyDb, saveOrder });
+    return { app, saveOrder };
+  }
+
+  it("speichert die Bestellung mit dem vom Server berechneten Preis", async () => {
+    const { app, saveOrder } = makeApp();
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/orders",
+      payload: validOrder,
+    });
+
+    expect(response.statusCode).toBe(201);
+    // 4 m × 2,5 m = 10 m² → 400 € + 10 × 90 € = 1.300 € netto, dazu 19 % MwSt.
+    expect(saveOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        netCents: 130_000,
+        vatCents: 24_700,
+        grossCents: 154_700,
+      }),
+    );
+    await app.close();
+  });
+
+  it("ignoriert einen Preis, den der Client mitschickt", async () => {
+    const { app, saveOrder } = makeApp();
+
+    await app.inject({
+      method: "POST",
+      url: "/orders",
+      payload: { ...validOrder, grossCents: 1 }, // Manipulationsversuch
+    });
+
+    // Gespeichert wird trotzdem der richtige Preis
+    expect(saveOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ grossCents: 154_700 }),
+    );
+    await app.close();
+  });
+
+  it("lehnt eine zu kleine Breite mit 400 ab und speichert nichts", async () => {
+    const { app, saveOrder } = makeApp();
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/orders",
+      payload: { ...validOrder, widthCm: 50 },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(saveOrder).not.toHaveBeenCalled();
+    await app.close();
+  });
+});
