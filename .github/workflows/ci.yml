@@ -18,8 +18,6 @@ jobs:
 
       # 2. pnpm installieren, dieselbe Hauptversion wie bei dir lokal
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       # 3. Node.js installieren und den pnpm-Cache aktivieren,
       #    damit spätere Läufe schneller sind
