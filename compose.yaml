@@ -40,5 +40,15 @@ services:
         # Erst starten, wenn die Datenbank wirklich Verbindungen annimmt
         condition: service_healthy
 
+  product-service:
+    build:
+      # Hauptordner als Build-Kontext, damit shared-Paket und Lockdatei erreichbar sind
+      context: .
+      dockerfile: services/product-service/Dockerfile
+    environment:
+      PORT: 4001
+    ports:
+      - "4001:4001"
+
 volumes:
   pgdata:
