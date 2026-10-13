@@ -1,0 +1,14 @@
+# Wird im Container neu installiert, die Mac-Version passt nicht für Linux
+node_modules
+**/node_modules
+
+# Build-Ergebnisse entstehen im Container neu
+**/dist
+.turbo
+**/.turbo
+
+# Zugangsdaten gehören NIE in ein Image
+**/.env
+
+# Git-Verlauf braucht das Image nicht
+.git
