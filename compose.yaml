@@ -1,6 +1,11 @@
+# Local development infrastructure only.
+# The services themselves run via `pnpm dev` for fast reloads;
+# they will be containerized later (week 2).
 services:
   postgres:
+    # Alpine: smaller image, faster pulls locally and in CI
     image: postgres:17-alpine
+    container_name: awning-postgres
     environment:
       POSTGRES_USER: awning
       POSTGRES_PASSWORD: awning
@@ -8,12 +13,15 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      # Named volume so data survives `docker compose down`
       - pgdata:/var/lib/postgresql/data
     healthcheck:
+      # Lets other containers (and later Kubernetes probes) wait
+      # until the DB actually accepts connections, not just until it started
       test: ["CMD-SHELL", "pg_isready -U awning -d orders"]
       interval: 5s
       timeout: 3s
-      retries: 5
+      retries: 10
 
 volumes:
   pgdata:

@@ -11,8 +11,10 @@ if (!databaseUrl) {
 
 const port = Number(process.env.PORT ?? 4002);
 const database = createDatabase(databaseUrl);
-const app = buildApp({ checkDatabase: database.check }, { logger: true });
-
+const app = buildApp(
+  { checkDatabase: database.check, saveOrder: database.saveOrder },
+  { logger: true },
+);
 // Kubernetes sends SIGTERM before stopping a pod.
 // Close HTTP first, then the DB pool, so running requests can finish.
 for (const signal of ["SIGTERM", "SIGINT"] as const) {

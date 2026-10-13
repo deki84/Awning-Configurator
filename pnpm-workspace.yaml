@@ -3,5 +3,8 @@ packages:
   - services/*
   - packages/*
 
+ignoredBuiltDependencies:
+  - esbuild
+
 onlyBuiltDependencies:
   - unrs-resolver
