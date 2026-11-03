@@ -31,3 +31,40 @@ jobs:
 
       # 5. Alle Tests in allen Paketen über Turborepo ausführen
       - run: pnpm turbo run test
+
+  images:
+    # Erst bauen, wenn alle Tests grün sind
+    needs: test
+    # Nur bei Push auf main, nicht bei Pull Requests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    # GITHUB_TOKEN darf Images in die Registry schreiben
+    permissions:
+      contents: read
+      packages: write
+
+    # Matrix: derselbe Ablauf für beide Services, parallel
+    strategy:
+      matrix:
+        service: [product-service, order-service]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Bei der GitHub Container Registry anmelden (kein eigenes Passwort nötig)
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Image bauen und pushen: einmal mit Commit-Hash, einmal als "latest"
+      - uses: docker/build-push-action@v6
+        with:
+          context: . # Repo-Root, damit shared und Lockfile erreichbar sind
+          file: services/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/deki84/awning-${{ matrix.service }}:${{ github.sha }}
+            ghcr.io/deki84/awning-${{ matrix.service }}:latest
