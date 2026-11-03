@@ -166,7 +166,7 @@ argocd/                Argo CD application
 - [x] GitOps deployment with Argo CD
 - [x] Build and push images in CI (GitHub Container Registry)
 - [x] Manage secrets with Sealed Secrets
-- [ ] 3D awning preview with React Three Fiber
+- [x] 3D awning preview with React Three Fiber
 
 ## Author
 
