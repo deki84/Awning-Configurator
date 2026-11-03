@@ -94,7 +94,7 @@ packages/
 - [x] Docker images and Docker Compose
 - [x] Kubernetes deployment (k3d)
 - [x] CI pipeline with GitHub Actions
-- [ ] GitOps deployment with Argo CD
+- [x] GitOps deployment with Argo CD
 
 ## Author
 

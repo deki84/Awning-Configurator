@@ -1,0 +1,21 @@
+# Argo CD Application: verbindet ein Git-Verzeichnis mit einem Ziel im Cluster
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: markise
+  namespace: argocd # Applications leben im Namespace von Argo CD
+spec:
+  project: default
+  # Quelle: Was soll deployt werden?
+  source:
+    repoURL: https://github.com/deki84/Awning-Configurator.git
+    targetRevision: main # Branch, den Argo CD beobachtet
+    path: k8s # Nur dieser Ordner wird angewendet
+  # Ziel: Wohin soll es deployt werden?
+  destination:
+    server: https://kubernetes.default.svc # Das Cluster, in dem Argo CD selbst läuft
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true # Was aus Git gelöscht wird, wird auch im Cluster gelöscht
+      selfHeal: true # Manuelle Änderungen im Cluster werden auf den Git-Stand zurückgesetzt
