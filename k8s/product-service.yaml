@@ -1,0 +1,54 @@
+# Deployment: sorgt dafür, dass immer die gewünschte Anzahl Pods läuft
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+spec:
+  replicas: 2 # Zwei Pods für Ausfallsicherheit
+  selector:
+    matchLabels:
+      app: product-service # Welche Pods gehören zu diesem Deployment?
+  template:
+    metadata:
+      labels:
+        app: product-service # Label muss zum selector oben passen
+    spec:
+      containers:
+        - name: product-service
+          image: markise/product-service:v1 # Das importierte Image
+          imagePullPolicy: IfNotPresent # Lokales Image nutzen, nicht aus dem Internet ziehen
+          ports:
+            - containerPort: 4001
+          # Liveness: Lebt der Prozess noch? Wenn nein → Container neu starten
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          # Readiness: Darf der Pod schon Traffic bekommen?
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4001
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            requests: # Garantierte Ressourcen
+              cpu: 50m
+              memory: 64Mi
+            limits: # Obergrenze, damit ein Pod nicht den Node blockiert
+              cpu: 250m
+              memory: 128Mi
+---
+# Service: feste Adresse (DNS-Name) für alle product-service-Pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service # Erreichbar im Cluster unter http://product-service:4001
+spec:
+  selector:
+    app: product-service # Leitet Traffic an alle Pods mit diesem Label
+  ports:
+    - port: 4001 # Port des Service
+      targetPort: 4001 # Port im Container
