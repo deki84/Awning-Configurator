@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "build": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/server.js --external:fastify --external:postgres --external:drizzle-orm",
+    "build": "esbuild src/server.ts src/migrate.ts --bundle --platform=node --format=esm --target=node22 --outdir=dist --external:fastify --external:postgres --external:drizzle-orm",
     "start": "node dist/server.js"
   },
   "dependencies": {

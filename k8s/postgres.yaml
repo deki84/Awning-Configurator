@@ -1,0 +1,66 @@
+# StatefulSet statt Deployment: für Datenbanken, weil jeder Pod
+# eine feste Identität und sein eigenes, dauerhaftes Volume bekommt
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1 # Eine Datenbank-Instanz (Replikation wäre deutlich komplexer)
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+          # Alle Werte aus dem Secret als Umgebungsvariablen laden
+          envFrom:
+            - secretRef:
+                name: db-credentials
+          env:
+            # Daten in einen Unterordner legen (vermeidet Probleme mit leeren Volumes)
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          # Readiness: Erst Traffic, wenn Postgres Verbindungen annimmt
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "markise"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          # Liveness: Hängt Postgres? Dann neu starten
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "markise"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+  # Für jeden Pod wird automatisch ein eigenes Volume (PVC) erstellt
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+# Service: macht Postgres im Cluster unter dem Namen "postgres" erreichbar
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

@@ -92,7 +92,7 @@ packages/
 - [x] product-service with REST API and integration tests
 - [x] order-service with PostgreSQL
 - [x] Docker images and Docker Compose
-- [ ] Kubernetes deployment (k3d)
+- [x] Kubernetes deployment (k3d)
 - [x] CI pipeline with GitHub Actions
 - [ ] GitOps deployment with Argo CD
 

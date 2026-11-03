@@ -1,0 +1,62 @@
+# Deployment für den order-service (braucht die Datenbank)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: markise/order-service:v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4002
+          env:
+            # Verbindungs-URL aus dem Secret, nie im Klartext im YAML
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DATABASE_URL
+          # Liveness: Prozess lebt? Prüft NICHT die DB, sonst würde ein DB-Ausfall
+          # alle Pods neu starten, obwohl ein Neustart nichts bringt
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          # Readiness: DB erreichbar? Wenn nein (503) → kein Traffic, aber kein Neustart
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 4002
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+# Service: im Cluster erreichbar unter http://order-service:4002
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 4002
+      targetPort: 4002

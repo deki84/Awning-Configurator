@@ -1,0 +1,22 @@
+# Job: läuft einmal bis zum Erfolg und beendet sich dann (anders als ein Deployment)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: order-migration
+spec:
+  backoffLimit: 4 # Bis zu 4 neue Versuche, z. B. falls Postgres noch nicht bereit ist
+  template:
+    spec:
+      restartPolicy: Never # Bei Fehler einen neuen Pod starten statt denselben neu zu starten
+      containers:
+        - name: migrate
+          image: markise/order-service:v2 # Dasselbe Image wie der Service
+          imagePullPolicy: IfNotPresent
+          command: ["node", "dist/migrate.js"] # Statt server.js das Migrations-Skript starten
+          env:
+            # Nur die DATABASE_URL aus dem Secret holen
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DATABASE_URL

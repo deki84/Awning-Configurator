@@ -35,6 +35,8 @@ RUN pnpm install --frozen-lockfile --prod --filter @markise/order-service...
 # Aus Stufe 1 nur die fertige JavaScript-Datei übernehmen
 COPY --from=build /app/services/order-service/dist services/order-service/dist
 
+COPY services/order-service/drizzle services/order-service/drizzle
+
 WORKDIR /app/services/order-service
 
 # Nicht als root laufen: Wird der Service angegriffen, hat der Angreifer weniger Rechte
