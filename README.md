@@ -164,8 +164,8 @@ argocd/                Argo CD application
 - [x] Docker images and Docker Compose
 - [x] Kubernetes deployment (k3d)
 - [x] GitOps deployment with Argo CD
-- [ ] Build and push images in CI (GitHub Container Registry)
-- [ ] Manage secrets with Sealed Secrets
+- [x] Build and push images in CI (GitHub Container Registry)
+- [x] Manage secrets with Sealed Secrets
 - [ ] 3D awning preview with React Three Fiber
 
 ## Author
