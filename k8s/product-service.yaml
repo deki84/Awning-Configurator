@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: product-service
 spec:
-  replicas: 2 # Zwei Pods für Ausfallsicherheit
+  replicas: 3 # Drei Pods, deployt per GitOps
   selector:
     matchLabels:
       app: product-service # Welche Pods gehören zu diesem Deployment?
